@@ -1,0 +1,152 @@
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #000000;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.sidebar.collapsed .sidebar-top {
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.sidebar-top img {
+    width: 30px;
+    height: 30px;
+}
+
+.sidebar-toggle button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.sidebar.collapsed .sidebar-toggle button {
+    transform: none;
+}
+
+.sidebar-toggle {
+    position: relative;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+    position: fixed;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+}
+
+.sidebar-toggle-bottom {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-toggle-bottom {
+    display: block;
+    margin-bottom: 1rem;
+    position: fixed;
+    bottom: 80px;
+    left: 1rem;
+    z-index: 100;
+}
+
+.sidebar-toggle-bottom button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.sidebar-new-chat {
+    margin-bottom: 2rem;
+}
+
+.sidebar-new-chat button {
+    width: 100%;
+    padding: 0.8rem;
+    background: #343541;
+    border: 1px solid #565869;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-new-chat button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0 auto;
+    border-radius: 50%;
+}
+
+.sidebar-new-chat button span {
+    white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-new-chat button span {
+    font-size: 1.5rem;
+    content: '+';
+}
+
+.sidebar-recent-chats {
+    flex: 1;
+    color: #565869;
+    overflow-y: auto;
+}
+
+.sidebar.collapsed .sidebar-recent-chats p,
+.sidebar.collapsed .sidebar-profile-info {
+    display: none;
+}
+
+.sidebar-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid #565869;
+}
+
+.sidebar-profile img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.sidebar-profile-info p {
+    color: white;
+    margin: 0;
+}
