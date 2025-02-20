@@ -1,6 +1,5 @@
 import os
 
-
 from groq import Groq
 import google.generativeai as genai
 from dotenv import load_dotenv
@@ -22,8 +21,8 @@ def get_file_type(file_path):
     elif file_extension == ".txt":
         return extract_text_from_txt(file_path)
 
-    elif file_extension == ".pptx" or file_extension == ".ppt":
-        return extract_text_from_txt(file_path)
+    # elif file_extension == ".pptx" or file_extension == ".ppt":
+    #    return extract_text_from_ppt(file_path)
 
     # TODO: List supported types
     else:
@@ -34,7 +33,7 @@ def main():
     load_dotenv()
 
     # TODO: Add functionality to take file path from command line arguments
-    file_path = "E:\\SITNovate-Hackathon\\r1-paper - Copy-1-10-1-5.pdf"
+    file_path = "E:\\SITNovate-Hackathon\\test.txt"
     text = get_file_type(file_path)
 
     decided_client = "gemini"
