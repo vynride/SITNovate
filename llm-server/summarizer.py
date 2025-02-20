@@ -61,9 +61,8 @@ def main():
             Use the provided input to generate a summary using abstractive summarization. 
             Ensure the summary is professional in nature and in paragraphs form. 
             Ensure that you utilize the entire provided input as context for the summarization process. 
-            When possible you must provide relevant citations from the provided text itself. 
+            When possible and valid you must provide relevant citations from the provided text itself. 
             Integrate keywords from the text in your final summary.
-
         """,
 
         )
