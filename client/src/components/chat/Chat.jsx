@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+
 import { exportToPDF, exportToDocx, exportToTXT } from '../../utils/exportUtils'
 import "./chat.css"
 
@@ -176,6 +177,17 @@ const Chat = ({ className, isSidebarCollapsed }) => {
                           <button onClick={() => handleExport(msg.content, 'txt')}>Export TXT</button>
                         </div>
                       </>
+                      <ReactMarkdown 
+                        className="markdown-content"
+                        components={{
+                          p: ({node, ...props}) => <p className="message-paragraph" {...props} />,
+                          ul: ({node, ...props}) => <ul className="message-list" {...props} />,
+                          li: ({node, ...props}) => <li className="message-list-item" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="message-quote" {...props} />
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     )}
                     <span className="message-time">
                       {new Date(msg.timestamp).toLocaleTimeString()}
