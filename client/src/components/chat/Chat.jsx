@@ -1,9 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import "./chat.css"
 
 const Chat = () => {
   const [files, setFiles] = useState([]);
   const [prompt, setPrompt] = useState('');
+  const [conversations, setConversations] = useState([]);
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
+
+  const fetchConversations = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/conversations');
+      const data = await response.json();
+      if (data.success) {
+        setConversations(data.conversations);
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -30,9 +47,9 @@ const Chat = () => {
 
     const formData = new FormData();
     files.forEach(file => {
-      formData.append('files', file); // Changed from file${index} to files
+      formData.append('files', file);
     });
-    formData.append('prompt', prompt || ''); // Ensure prompt is always sent
+    formData.append('prompt', prompt || '');
 
     try {
       const response = await fetch('http://localhost:3000/api/upload', {
@@ -45,10 +62,16 @@ const Chat = () => {
       }
 
       const data = await response.json();
-      console.log('Upload response:', data);
+      if (data.success) {
+        await fetchConversations(); // Refresh conversations
+        setFiles([]); // Clear files
+        setPrompt(''); // Clear prompt
+      } else {
+        throw new Error(data.error || 'Processing failed');
+      }
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to upload files: ' + error.message);
+      alert('Failed to process files: ' + error.message);
     }
   };
 
@@ -98,6 +121,30 @@ const Chat = () => {
             ))}
           </div>
         )}
+
+        <div className="chat-conversations">
+          {conversations.map((conv, index) => (
+            <div key={index} className="chat-conversation">
+              <div className="chat-conversation-header">
+                <span>{conv.originalName}</span>
+                <span>{new Date(conv.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="chat-messages">
+                {conv.messages.map((msg, msgIndex) => (
+                  <div 
+                    key={msgIndex} 
+                    className={`chat-message ${msg.role === 'user' ? 'user' : 'assistant'}`}
+                  >
+                    <p>{msg.content}</p>
+                    <span className="message-time">
+                      {new Date(msg.timestamp).toLocaleTimeString()}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </main>
   )
