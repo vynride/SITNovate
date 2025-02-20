@@ -61,9 +61,8 @@
   }
   
   .app {
-    display: grid;
-    grid-template-columns: 260px 1fr;
     min-height: 100vh;
+    background-color: var(--background);
   }
   
   .sidebar {
@@ -72,7 +71,12 @@
   }
   
   .chat {
-    background-color: var(--background);
-    height: 100vh;
+    margin-left: 260px; /* Width of sidebar */
+    min-height: 100vh;
     overflow-y: auto;
+    transition: margin-left 0.3s ease;
+  }
+  
+  .chat.sidebar-collapsed {
+    margin-left: 80px; /* Width of collapsed sidebar */
   }

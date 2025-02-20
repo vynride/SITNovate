@@ -1,4 +1,7 @@
 .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
     width: 260px;
     height: 100vh;
     background: #000000;
@@ -6,6 +9,7 @@
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    z-index: 1000;
 }
 
 .sidebar.collapsed {

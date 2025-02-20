@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
 import './sidebar.css'
 
-const Sidebar = () => {
+const Sidebar = ({ onToggle }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleSidebar = () => {
         setIsCollapsed(!isCollapsed);
+        onToggle && onToggle(!isCollapsed);
     };
 
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-top">
-                <img src="chat/vite.svg" alt="" />
+                <img src="chat/logo.jpg" alt="" />
                 {!isCollapsed && <div className="sidebar-toggle">
                     <button onClick={toggleSidebar}>
                         <span>☰</span>
