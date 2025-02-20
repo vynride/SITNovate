@@ -1,8 +1,14 @@
+import sys
+import json
+import tempfile
 import os
-
+from pathlib import Path
 from groq import Groq
 import google.generativeai as genai
 from dotenv import load_dotenv
+
+# Load environment variables at the start
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 from file_processing.pdf_text_extract import extract_text_from_pdf
 from file_processing.txt_text_extract import extract_text_from_txt
 from file_processing.doc_text_extract import extract_text_from_docx
@@ -29,105 +35,153 @@ def get_file_type(file_path):
         raise ValueError("Unsupported file type!")
 
 
-def main():
-    load_dotenv()
+def process_file(file_name, file_content, user_prompt):
+    try:
+        # Create temporary file with the same extension
+        file_extension = os.path.splitext(file_name)[1].lower()
+        with tempfile.NamedTemporaryFile(suffix=file_extension, delete=False) as temp_file:
+            temp_file.write(file_content)
+            temp_path = temp_file.name
 
-    # TODO: Add functionality to take file path from command line arguments
-    file_path = "E:\\SITNovate-Hackathon\\test.txt"
-    text = get_file_type(file_path)
+        # Get text from file
+        text = get_file_type(temp_path)
+        
+        # Clean up temp file
+        os.unlink(temp_path)
 
-    decided_client = "gemini"
+        # Rest of your LLM processing code
+        decided_client = "gemini"
+        summary = ""
 
-    # gemini
-    if (decided_client == "gemini"):
-        genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+        # gemini
+        if (decided_client == "gemini"):
+            if "GEMINI_API_KEY" not in os.environ:
+                raise ValueError("GEMINI_API_KEY not found in environment variables")
+            
+            genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-        # Create the model
-        generation_config = {
-        "temperature": 1,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-        "response_mime_type": "text/plain",
+            # Create the model
+            generation_config = {
+            "temperature": 1,
+            "top_p": 0.95,
+            "top_k": 40,
+            "max_output_tokens": 8192,
+            "response_mime_type": "text/plain",
+            }
+
+            model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash",
+            generation_config=generation_config,
+            system_instruction=
+
+            """
+                You are a research assistant whose job is to extract all relevant and critical information from research papers. 
+                Use the provided input to generate a summary using abstractive summarization. 
+                Ensure the summary is professional in nature and in paragraphs form. 
+                Ensure that you utilize the entire provided input as context for the summarization process. 
+                When possible and valid you must provide relevant citations from the provided text itself. 
+                Integrate keywords from the text in your final summary.
+            """,
+
+            )
+
+            chat_session = model.start_chat(
+            history=[
+            ]
+            )
+
+            response = chat_session.send_message(text)
+            summary = response.text
+
+        # groq
+        elif (decided_client == "groq"):
+            if "GROQ_API_KEY" not in os.environ:
+                raise ValueError("GROQ_API_KEY not found in environment variables")
+            
+            client = Groq(
+                api_key=os.getenv("GROQ_API_KEY")
+            )
+
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    # system message
+                    {
+                        "role": "system",
+
+                        # system prompt
+                        "content":             
+                        """
+                            You are a research assistant whose job is to extract all relevant and critical information from research papers.
+                            Use the provided input to generate a concise summary using abstractive summarization. 
+                            Ensure the summary is professional in nature and in paragraph form. Ensure that you utilize the entire provided input as context for the summarization process.
+                            When possible you must provide relevant citations from the provided text itself. Integrate keywords from the text in your final summary.
+                            If the input is less than 300 words then aim to summarize the input in about 50 words or less.
+                        """
+                    },
+
+                    # user message
+                    {
+                        "role": "user",
+                        "content": text,
+                    }
+                ],
+
+                # Language model to use
+                model="llama-3.3-70b-versatile",
+
+                # Optional parameters
+                temperature=0.5,
+                max_completion_tokens=1024,
+                top_p=1,
+                stop=None,
+                stream=False,
+
+                
+            )
+
+            output = chat_completion.choices[0].message.content
+            summary = chat_completion.choices[0].message.content
+
+        # TODO: implement custom fine tuned models from huggingface
+        # hugginface
+        else:
+            print("TODO")
+
+        return {
+            "success": True,
+            "extractedText": text,
+            "summary": summary
         }
 
-        model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        generation_config=generation_config,
-        system_instruction=
-
-        """
-            You are a research assistant whose job is to extract all relevant and critical information from research papers. 
-            Use the provided input to generate a summary using abstractive summarization. 
-            Ensure the summary is professional in nature and in paragraphs form. 
-            Ensure that you utilize the entire provided input as context for the summarization process. 
-            When possible and valid you must provide relevant citations from the provided text itself. 
-            Integrate keywords from the text in your final summary.
-        """,
-
-        )
-
-        chat_session = model.start_chat(
-        history=[
-        ]
-        )
-
-        response = chat_session.send_message(text)
-
-        print(response.text)
-
-    # groq
-    elif (decided_client == "groq"):
-        client = Groq(
-            api_key=os.getenv("GROQ_API_KEY")
-        )
-
-        chat_completion = client.chat.completions.create(
-            messages=[
-                # system message
-                {
-                    "role": "system",
-
-                    # system prompt
-                    "content":             
-                    """
-                        You are a research assistant whose job is to extract all relevant and critical information from research papers.
-                        Use the provided input to generate a concise summary using abstractive summarization. 
-                        Ensure the summary is professional in nature and in paragraph form. Ensure that you utilize the entire provided input as context for the summarization process.
-                        When possible you must provide relevant citations from the provided text itself. Integrate keywords from the text in your final summary.
-                        If the input is less than 300 words then aim to summarize the input in about 50 words or less.
-                    """
-                },
-
-                # user message
-                {
-                    "role": "user",
-                    "content": text,
-                }
-            ],
-
-            # Language model to use
-            model="llama-3.3-70b-versatile",
-
-            # Optional parameters
-            temperature=0.5,
-            max_completion_tokens=1024,
-            top_p=1,
-            stop=None,
-            stream=False,
-
-            
-        )
-
-        output = chat_completion.choices[0].message.content
-
-        print(chat_completion.choices[0].message.content)
-
-    # TODO: implement custom fine tuned models from huggingface
-    # hugginface
-    else:
-        print("TODO")
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 
+def main():
+    try:
+        if len(sys.argv) < 2:
+            raise ValueError("File name argument is required")
 
-main()
+        file_name = sys.argv[1]
+        user_prompt = sys.argv[2] if len(sys.argv) > 2 else ""
+
+        # Read file content from stdin
+        file_content = sys.stdin.buffer.read()
+
+        # Process the file
+        result = process_file(file_name, file_content, user_prompt)
+
+        # Output JSON result
+        print(json.dumps(result))
+
+    except Exception as e:
+        print(json.dumps({
+            "success": False,
+            "error": str(e)
+        }))
+
+if __name__ == "__main__":
+    main()

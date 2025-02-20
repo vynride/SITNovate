@@ -36,9 +36,12 @@ router.post('/upload', upload.array('files', 5), async (req, res) => {
 
       // Process with Python script
       const pythonResult = await new Promise((resolve, reject) => {
+        // Create temp file path with original extension
+        const tempFileName = `temp_${Date.now()}${path.extname(file.originalname)}`;
+        
         const pythonProcess = spawn('python', [
           path.join(__dirname, '../../llm-server/summarizer.py'),
-          file.originalname,
+          tempFileName,  // Pass temp filename with extension
           userPrompt || ''
         ]);
 
