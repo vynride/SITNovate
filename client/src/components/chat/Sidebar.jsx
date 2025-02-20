@@ -12,7 +12,7 @@ const Sidebar = ({ onToggle }) => {
     return (
         <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
             <div className="sidebar-top">
-                <img src="chat/vite.svg" alt="" />
+                <img src="chat/logo.jpg" alt="" />
                 {!isCollapsed && <div className="sidebar-toggle">
                     <button onClick={toggleSidebar}>
                         <span>☰</span>

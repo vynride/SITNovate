@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
+
+import { exportToPDF, exportToDocx, exportToTXT } from '../../utils/exportUtils'
 import "./chat.css"
 
 const Chat = ({ className, isSidebarCollapsed }) => {
@@ -76,6 +78,22 @@ const Chat = ({ className, isSidebarCollapsed }) => {
     }
   };
 
+  const handleExport = (content, type) => {
+    switch(type) {
+      case 'pdf':
+        exportToPDF(content);
+        break;
+      case 'docx':
+        exportToDocx(content);
+        break;
+      case 'txt':
+        exportToTXT(content);
+        break;
+      default:
+        console.error('Unsupported export type');
+    }
+  };
+
   return (
     <main className={`chat-main ${className} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <h1 className="chat-heading">Document Summarization Assistant</h1>
@@ -141,6 +159,24 @@ const Chat = ({ className, isSidebarCollapsed }) => {
                     {msg.role === 'user' ? (
                       <p>{msg.content}</p>
                     ) : (
+                      <>
+                        <ReactMarkdown 
+                          className="markdown-content"
+                          components={{
+                            p: ({node, ...props}) => <p className="message-paragraph" {...props} />,
+                            ul: ({node, ...props}) => <ul className="message-list" {...props} />,
+                            li: ({node, ...props}) => <li className="message-list-item" {...props} />,
+                            blockquote: ({node, ...props}) => <blockquote className="message-quote" {...props} />
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                        <div className="export-buttons">
+                          <button onClick={() => handleExport(msg.content, 'pdf')}>Export PDF</button>
+                          <button onClick={() => handleExport(msg.content, 'docx')}>Export DOCX</button>
+                          <button onClick={() => handleExport(msg.content, 'txt')}>Export TXT</button>
+                        </div>
+                      </>
                       <ReactMarkdown 
                         className="markdown-content"
                         components={{
