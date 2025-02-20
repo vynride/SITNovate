@@ -53,6 +53,9 @@ def process_file(file_name, file_content, user_prompt):
         decided_client = "gemini"
         summary = ""
 
+        # Prepare the content with user prompt if provided
+        content_with_prompt = f"User Request: {user_prompt}\n\nDocument Content:\n{text}" if user_prompt else text
+
         # gemini
         if (decided_client == "gemini"):
             if "GEMINI_API_KEY" not in os.environ:
@@ -76,11 +79,10 @@ def process_file(file_name, file_content, user_prompt):
 
             """
                 You are a research assistant whose job is to extract all relevant and critical information from research papers. 
-                Use the provided input to generate a summary using abstractive summarization. 
-                Ensure the summary is professional in nature and in paragraphs form. 
-                Ensure that you utilize the entire provided input as context for the summarization process. 
-                When possible and valid you must provide relevant citations from the provided text itself. 
-                Integrate keywords from the text in your final summary.
+                Address the user's specific request if provided, otherwise generate a comprehensive summary.
+                Use abstractive summarization and ensure the response is professional in nature.
+                When possible, provide relevant citations from the text itself.
+                Integrate keywords from the text in your response.
             """,
 
             )
@@ -90,7 +92,7 @@ def process_file(file_name, file_content, user_prompt):
             ]
             )
 
-            response = chat_session.send_message(text)
+            response = chat_session.send_message(content_with_prompt)
             summary = response.text
 
         # groq
@@ -112,17 +114,18 @@ def process_file(file_name, file_content, user_prompt):
                         "content":             
                         """
                             You are a research assistant whose job is to extract all relevant and critical information from research papers.
-                            Use the provided input to generate a concise summary using abstractive summarization. 
-                            Ensure the summary is professional in nature and in paragraph form. Ensure that you utilize the entire provided input as context for the summarization process.
-                            When possible you must provide relevant citations from the provided text itself. Integrate keywords from the text in your final summary.
-                            If the input is less than 300 words then aim to summarize the input in about 50 words or less.
+                            Address the user's specific request if provided, otherwise generate a comprehensive summary.
+                            Use abstractive summarization and ensure the response is professional in nature.
+                            When possible, provide relevant citations from the text itself.
+                            Integrate keywords from the text in your response.
+                            If the input is less than 300 words then aim to summarize in about 50 words unless specified otherwise.
                         """
                     },
 
                     # user message
                     {
                         "role": "user",
-                        "content": text,
+                        "content": content_with_prompt,
                     }
                 ],
 
@@ -139,7 +142,6 @@ def process_file(file_name, file_content, user_prompt):
                 
             )
 
-            output = chat_completion.choices[0].message.content
             summary = chat_completion.choices[0].message.content
 
         # TODO: implement custom fine tuned models from huggingface
