@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
 import './sidebar.css'
 
-const Sidebar = () => {
+const Sidebar = ({ onToggle }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const toggleSidebar = () => {
         setIsCollapsed(!isCollapsed);
+        onToggle && onToggle(!isCollapsed);
     };
 
     return (

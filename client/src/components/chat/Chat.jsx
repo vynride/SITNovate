@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
+import ReactMarkdown from 'react-markdown'
 import "./chat.css"
 
-const Chat = () => {
+const Chat = ({ className, isSidebarCollapsed }) => {
   const [files, setFiles] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [conversations, setConversations] = useState([]);
@@ -76,8 +77,8 @@ const Chat = () => {
   };
 
   return (
-    <main className="chat-main">
-      <h1 className="chat-heading">What can I help you summarize?</h1>
+    <main className={`chat-main ${className} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <h1 className="chat-heading">Document Summarization Assistant</h1>
 
       <div className="chat-container">
         <div className="chat-inputContainer">
@@ -126,8 +127,10 @@ const Chat = () => {
           {conversations.map((conv, index) => (
             <div key={index} className="chat-conversation">
               <div className="chat-conversation-header">
-                <span>{conv.originalName}</span>
-                <span>{new Date(conv.createdAt).toLocaleString()}</span>
+                <div className="chat-conversation-title">
+                  <span className="file-name">{conv.originalName}</span>
+                  <span className="chat-date">{new Date(conv.createdAt).toLocaleString()}</span>
+                </div>
               </div>
               <div className="chat-messages">
                 {conv.messages.map((msg, msgIndex) => (
@@ -135,7 +138,21 @@ const Chat = () => {
                     key={msgIndex} 
                     className={`chat-message ${msg.role === 'user' ? 'user' : 'assistant'}`}
                   >
-                    <p>{msg.content}</p>
+                    {msg.role === 'user' ? (
+                      <p>{msg.content}</p>
+                    ) : (
+                      <ReactMarkdown 
+                        className="markdown-content"
+                        components={{
+                          p: ({node, ...props}) => <p className="message-paragraph" {...props} />,
+                          ul: ({node, ...props}) => <ul className="message-list" {...props} />,
+                          li: ({node, ...props}) => <li className="message-list-item" {...props} />,
+                          blockquote: ({node, ...props}) => <blockquote className="message-quote" {...props} />
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    )}
                     <span className="message-time">
                       {new Date(msg.timestamp).toLocaleTimeString()}
                     </span>
